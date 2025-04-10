@@ -78,7 +78,7 @@ public class CharacterFormDialog extends JDialog {
         add(strSpinner);
         add(new JLabel("Stamina:"));
         add(staSpinner);
-
+        
         JButton saveButton = new JButton("Save");
         saveButton.addActionListener(e -> {
             if (nameField.getText().isEmpty()) {

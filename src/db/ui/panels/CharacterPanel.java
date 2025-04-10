@@ -213,9 +213,9 @@ public class CharacterPanel extends JPanel {
                     if (index >= 0) {
                         characters.set(index, updatedCharacter);
                     }
-                    System.out.println("Character updated in database: " + updatedCharacter.getName());
                     
                     stmt.close();
+                    System.out.println("Character updated in database: " + updatedCharacter.getName());
                 }
                 
                 conn.close();
