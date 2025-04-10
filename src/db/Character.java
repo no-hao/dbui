@@ -1,4 +1,4 @@
-package com.game.ui;
+package db;
 
 public class Character {
     private int id;

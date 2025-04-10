@@ -1,6 +1,6 @@
-package com.game.ui;
+package db.ui;
 
-import com.game.ui.panels.*;
+import db.ui.panels.*;
 import javax.swing.*;
 import java.awt.*;
 

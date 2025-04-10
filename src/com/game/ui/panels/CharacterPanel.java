@@ -1,10 +1,12 @@
-package com.game.ui;
+package com.game.ui.panels;
 
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.util.ArrayList;
+import com.game.ui.dialogs.*; // For dialogs like CharacterFormDialog
+import javax.swing.*; // For Swing components like JPanel, JTable, etc.
+import javax.swing.table.DefaultTableModel; // Add missing import
+import java.awt.*;    // For layouts like BorderLayout
 import java.util.List;
+import java.util.ArrayList;
+
 
 /**
  * Panel for managing characters.
@@ -16,15 +18,15 @@ public class CharacterPanel extends JPanel {
     private JButton btnAdd, btnEdit, btnDelete;
 
     // Mock data for characters (temporary until database integration)
-    private List<Character> mockCharacters;
+    private List<com.game.ui.Character> mockCharacters;
 
     public CharacterPanel() {
         setLayout(new BorderLayout());
 
         // Initialize mock data
         mockCharacters = new ArrayList<>();
-        mockCharacters.add(new Character(1, "Archer", "player1@example.com", 100, 20, 15));
-        mockCharacters.add(new Character(2, "Mage", "player2@example.com", 80, 10, 25));
+        mockCharacters.add(new com.game.ui.Character(1, "Archer", "player1@example.com", 100, 20, 15));
+        mockCharacters.add(new com.game.ui.Character(2, "Mage", "player2@example.com", 80, 10, 25));
 
         // Create table model and populate with mock data
         String[] columns = {"ID", "Name", "Player Email", "Max HP", "Strength", "Stamina"};
@@ -70,7 +72,7 @@ public class CharacterPanel extends JPanel {
      */
     private void populateTable() {
         tableModel.setRowCount(0); // Clear existing rows
-        for (Character character : mockCharacters) {
+        for (com.game.ui.Character character : mockCharacters) {
             tableModel.addRow(new Object[]{
                 character.getId(),
                 character.getName(),
@@ -86,12 +88,12 @@ public class CharacterPanel extends JPanel {
      * Shows a form dialog for adding or editing a character.
      * @param character The character to edit (null if adding a new one).
      */
-    private void showCharacterForm(Character character) {
+    private void showCharacterForm(com.game.ui.Character character) {
         CharacterFormDialog dialog = new CharacterFormDialog(character);
         dialog.setVisible(true);
 
         if (dialog.isSaved()) {
-            Character updatedCharacter = dialog.getCharacter();
+            com.game.ui.Character updatedCharacter = dialog.getCharacter();
             if (character == null) {
                 // Add new character
                 updatedCharacter.setId(mockCharacters.size() + 1); // Generate ID
@@ -132,7 +134,7 @@ public class CharacterPanel extends JPanel {
      * @param id The ID of the character.
      * @return The matching character or null if not found.
      */
-    private Character getCharacterById(int id) {
+    private com.game.ui.Character getCharacterById(int id) {
         return mockCharacters.stream().filter(c -> c.getId() == id).findFirst().orElse(null);
     }
 }
