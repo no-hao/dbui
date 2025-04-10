@@ -34,7 +34,7 @@ public class CharacterFormDialog extends JDialog {
             java.sql.Connection conn = java.sql.DriverManager.getConnection(
                 "jdbc:mysql://localhost:3306/gamedb", "root", "Password_27");
             java.sql.Statement stmt = conn.createStatement();
-            java.sql.ResultSet rs = stmt.executeQuery("SELECT loginId FROM PERSON");
+            java.sql.ResultSet rs = stmt.executeQuery("SELECT loginId FROM PLAYER");
             
             playerIds.clear(); // Clear default values if DB connection successful
             while(rs.next()) {

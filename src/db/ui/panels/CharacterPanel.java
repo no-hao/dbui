@@ -86,7 +86,7 @@ public class CharacterPanel extends JPanel {
             java.sql.Statement stmt = conn.createStatement();
             java.sql.ResultSet rs = stmt.executeQuery(
                 "SELECT name, playerId, locationId, maxPoints, currentPoints, stamina, strength " +
-                "FROM GAME_CHARACTER");
+                "FROM GAMECHARACTER");
             
             while (rs.next()) {
                 String name = rs.getString("name");
@@ -151,9 +151,35 @@ public class CharacterPanel extends JPanel {
                     "jdbc:mysql://localhost:3306/gamedb", "root", "Password_27");
                 
                 if (character == null) {
+                    // First, check if the default location exists
+                    boolean defaultLocationExists = false;
+                    java.sql.PreparedStatement checkStmt = conn.prepareStatement(
+                        "SELECT COUNT(*) FROM LOCATION WHERE lId = ?");
+                    checkStmt.setString(1, "default");
+                    java.sql.ResultSet checkRs = checkStmt.executeQuery();
+                    
+                    if (checkRs.next() && checkRs.getInt(1) > 0) {
+                        defaultLocationExists = true;
+                    }
+                    
+                    checkRs.close();
+                    checkStmt.close();
+                    
+                    // If default location doesn't exist, create it
+                    if (!defaultLocationExists) {
+                        java.sql.PreparedStatement createLocStmt = conn.prepareStatement(
+                            "INSERT INTO LOCATION (lId, size, type) VALUES (?, ?, ?)");
+                        createLocStmt.setString(1, "default");
+                        createLocStmt.setInt(2, 100);
+                        createLocStmt.setString(3, "forest");
+                        createLocStmt.executeUpdate();
+                        createLocStmt.close();
+                        System.out.println("Created default location");
+                    }
+                    
                     // Add new character to database
                     java.sql.PreparedStatement stmt = conn.prepareStatement(
-                        "INSERT INTO GAME_CHARACTER (name, playerId, locationId, maxPoints, currentPoints, stamina, strength) " +
+                        "INSERT INTO GAMECHARACTER (name, playerId, locationId, maxPoints, currentPoints, stamina, strength) " +
                         "VALUES (?, ?, ?, ?, ?, ?, ?)");
                     stmt.setString(1, updatedCharacter.getName());
                     stmt.setString(2, updatedCharacter.getPlayerId());
@@ -172,7 +198,7 @@ public class CharacterPanel extends JPanel {
                 } else {
                     // Update existing character in database
                     java.sql.PreparedStatement stmt = conn.prepareStatement(
-                        "UPDATE GAME_CHARACTER SET playerId = ?, maxPoints = ?, currentPoints = ?, " +
+                        "UPDATE GAMECHARACTER SET playerId = ?, maxPoints = ?, currentPoints = ?, " +
                         "stamina = ?, strength = ? WHERE name = ?");
                     stmt.setString(1, updatedCharacter.getPlayerId());
                     stmt.setInt(2, updatedCharacter.getMaxPoints());
@@ -229,7 +255,7 @@ public class CharacterPanel extends JPanel {
                     
                     // Delete character from database
                     java.sql.PreparedStatement stmt = conn.prepareStatement(
-                        "DELETE FROM GAME_CHARACTER WHERE name = ?");
+                        "DELETE FROM GAMECHARACTER WHERE name = ?");
                     stmt.setString(1, name);
                     stmt.executeUpdate();
                     

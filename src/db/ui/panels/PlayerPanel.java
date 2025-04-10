@@ -167,6 +167,15 @@ public class PlayerPanel extends JPanel {
                     stmt.setDate(4, java.sql.Date.valueOf(java.time.LocalDate.now()));
                     stmt.executeUpdate();
                     
+                    // Also insert into PLAYER table
+                    stmt = conn.prepareStatement(
+                        "INSERT INTO PLAYER (loginId, isSilenced, isBlocked, watchedBy) VALUES (?, ?, ?, ?)");
+                    stmt.setString(1, updatedPlayer.getLoginId());
+                    stmt.setBoolean(2, false);
+                    stmt.setBoolean(3, false);
+                    stmt.setString(4, null);
+                    stmt.executeUpdate();
+                    
                     stmt.close();
                     conn.close();
                     
@@ -248,7 +257,7 @@ public class PlayerPanel extends JPanel {
                             "jdbc:mysql://localhost:3306/gamedb", "root", "Password_27");
                         
                         java.sql.PreparedStatement stmt = conn.prepareStatement(
-                            "DELETE FROM GAME_CHARACTER WHERE playerId = ?");
+                            "DELETE FROM GAMECHARACTER WHERE playerId = ?");
                         stmt.setString(1, player.getLoginId());
                         int deletedRows = stmt.executeUpdate();
                         
@@ -331,7 +340,7 @@ public class PlayerPanel extends JPanel {
             
             java.sql.PreparedStatement stmt = conn.prepareStatement(
                 "SELECT name, playerId, locationId, maxPoints, currentPoints, stamina, strength " +
-                "FROM GAME_CHARACTER WHERE playerId = ?");
+                "FROM GAMECHARACTER WHERE playerId = ?");
             stmt.setString(1, playerId);
             java.sql.ResultSet rs = stmt.executeQuery();
             
