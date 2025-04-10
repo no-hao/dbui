@@ -93,7 +93,7 @@ public class CharacterFormDialog extends JDialog {
                         "jdbc:mysql://localhost:3306/gamedb", "root", "Password_27");
                     
                     java.sql.PreparedStatement checkStmt = conn.prepareStatement(
-                        "SELECT COUNT(*) FROM GAME_CHARACTER WHERE name = ?");
+                        "SELECT COUNT(*) FROM GAMECHARACTER WHERE name = ?");
                     checkStmt.setString(1, nameField.getText());
                     java.sql.ResultSet rs = checkStmt.executeQuery();
                     rs.next();

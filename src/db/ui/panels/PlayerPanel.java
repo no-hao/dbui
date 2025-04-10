@@ -1,19 +1,18 @@
 package db.ui.panels;
 
-import db.*;
-import db.Location;import db.Ability;import db.Player;import db.Character;import db.*;
-import db.Location;import db.Ability;import db.Player;import db.Character;import db.ui.dialogs.*;
-import db.Location;import db.Ability;import db.Player;import db.Character;
-import db.Location;import db.Ability;import db.Player;import javax.swing.*;
-import db.Location;import db.Ability;import db.Player;import db.Character;import javax.swing.table.DefaultTableModel;
-import db.Location;import db.Ability;import db.Player;import db.Character;import java.awt.*;
-import db.Location;import db.Ability;import db.Player;import db.Character;import java.util.ArrayList;
-import db.Location;import db.Ability;import db.Player;import db.Character;import java.util.List;
-import db.Location;import db.Ability;import db.Player;import db.Character;import java.util.stream.Collectors;
-import db.Location;import db.Ability;import db.Player;import db.Character;
-import db.Location;import db.Ability;import db.Player;/**
-import db.Location;import db.Ability; * Panel for managing players.
-import db.Location; * Provides functionality to view, add, edit, and delete players.
+import db.Player;
+import db.Character;
+import db.ui.dialogs.PlayerDialog;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * Panel for managing players.
+ * Provides functionality to view, add, edit, and delete players.
  */
 public class PlayerPanel extends JPanel {
     private JTable playerTable;

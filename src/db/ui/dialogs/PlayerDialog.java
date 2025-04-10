@@ -1,14 +1,14 @@
 package db.ui.dialogs;
 
-import db.*;
-import db.Location;import db.Ability;import db.Player;import db.Character;import javax.swing.*;
-import db.Location;import db.Ability;import db.Player;import db.Character;import java.awt.*;
-import db.Location;import db.Ability;import db.Player;import db.Character;import java.awt.event.ActionEvent;
-import db.Location;import db.Ability;import db.Player;import db.Character;import java.awt.event.ActionListener;
-import db.Location;import db.Ability;import db.Player;import db.Character;
-import db.Location;import db.Ability;import db.Player;/**
-import db.Location;import db.Ability; * Dialog for adding or editing a player.
-import db.Location; */
+import db.Player;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+/**
+ * Dialog for adding or editing a player.
+ */
 public class PlayerDialog extends JDialog {
     private boolean saved = false;
     private Player player;
@@ -146,7 +146,7 @@ public class PlayerDialog extends JDialog {
             
             // Only update password if a new one was provided
             if (!password.isEmpty()) {
-                player.setPasswordHash(password);
+                player.setPassword(password);
             }
         }
     }
