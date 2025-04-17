@@ -28,6 +28,9 @@ public class PlayerPanel extends JPanel {
     public PlayerPanel() {
         setLayout(new BorderLayout(5, 5));
         
+        // Initialize message client for database communication
+        messageClient = new MessageClient();
+        
         // Initialize player list from database
         loadPlayersFromDatabase();
         
@@ -156,31 +159,42 @@ public class PlayerPanel extends JPanel {
                 
                 // Also add to the database
                 try {
-                    java.sql.Connection conn = java.sql.DriverManager.getConnection(
-                        "jdbc:mysql://localhost:3306/gamedb", "root", "Password_27");
+                    String params = String.join(",",
+                        updatedPlayer.getLoginId(),
+                        updatedPlayer.getEmail(),
+                        updatedPlayer.getPassword(),
+                        java.time.LocalDate.now().toString(),
+                        "false", // isSilenced
+                        "false", // isBlocked
+                        "" // watchedBy (null)
+                    );
                     
-                    // Insert into PERSON table
-                    java.sql.PreparedStatement stmt = conn.prepareStatement(
-                        "INSERT INTO PERSON (loginId, email, password, dateCreated) VALUES (?, ?, ?, ?)");
-                    stmt.setString(1, updatedPlayer.getLoginId());
-                    stmt.setString(2, updatedPlayer.getEmail());
-                    stmt.setString(3, updatedPlayer.getPassword());
-                    stmt.setDate(4, java.sql.Date.valueOf(java.time.LocalDate.now()));
-                    stmt.executeUpdate();
+                    String response = messageClient.insert(
+                        "PERSON",
+                        "loginId,email,password,dateCreated",
+                        params
+                    );
                     
-                    // Also insert into PLAYER table
-                    stmt = conn.prepareStatement(
-                        "INSERT INTO PLAYER (loginId, isSilenced, isBlocked, watchedBy) VALUES (?, ?, ?, ?)");
-                    stmt.setString(1, updatedPlayer.getLoginId());
-                    stmt.setBoolean(2, false);
-                    stmt.setBoolean(3, false);
-                    stmt.setString(4, null);
-                    stmt.executeUpdate();
-                    
-                    stmt.close();
-                    conn.close();
-                    
-                    System.out.println("Player saved to database: " + updatedPlayer.getLoginId());
+                    if (response.startsWith("SUCCESS:")) {
+                        response = messageClient.insert(
+                            "PLAYER",
+                            "loginId,isSilenced,isBlocked,watchedBy",
+                            String.join(",",
+                                updatedPlayer.getLoginId(),
+                                "false",
+                                "false",
+                                ""
+                            )
+                        );
+                        
+                        if (response.startsWith("SUCCESS:")) {
+                            System.out.println("Player saved to database: " + updatedPlayer.getLoginId());
+                        } else {
+                            throw new Exception(response);
+                        }
+                    } else {
+                        throw new Exception(response);
+                    }
                 } catch (Exception e) {
                     System.out.println("Error saving player to database: " + e.getMessage());
                     JOptionPane.showMessageDialog(this, 
@@ -195,21 +209,20 @@ public class PlayerPanel extends JPanel {
                 
                 // Also update in the database
                 try {
-                    java.sql.Connection conn = java.sql.DriverManager.getConnection(
-                        "jdbc:mysql://localhost:3306/gamedb", "root", "Password_27");
+                    String response = messageClient.update(
+                        "PERSON",
+                        "email",
+                        updatedPlayer.getEmail(),
+                        "loginId",
+                        "=",
+                        updatedPlayer.getLoginId()
+                    );
                     
-                    // Update PERSON table
-                    java.sql.PreparedStatement stmt = conn.prepareStatement(
-                        "UPDATE PERSON SET email = ?, password = ? WHERE loginId = ?");
-                    stmt.setString(1, updatedPlayer.getEmail());
-                    stmt.setString(2, updatedPlayer.getPassword());
-                    stmt.setString(3, updatedPlayer.getLoginId());
-                    stmt.executeUpdate();
-                    
-                    stmt.close();
-                    conn.close();
-                    
-                    System.out.println("Player updated in database: " + updatedPlayer.getLoginId());
+                    if (response.startsWith("SUCCESS:")) {
+                        System.out.println("Player updated in database: " + updatedPlayer.getLoginId());
+                    } else {
+                        throw new Exception(response);
+                    }
                 } catch (Exception e) {
                     System.out.println("Error updating player in database: " + e.getMessage());
                     JOptionPane.showMessageDialog(this, 
@@ -254,18 +267,18 @@ public class PlayerPanel extends JPanel {
                 } else if (confirm == JOptionPane.YES_OPTION) {
                     // Delete characters from database
                     try {
-                        java.sql.Connection conn = java.sql.DriverManager.getConnection(
-                            "jdbc:mysql://localhost:3306/gamedb", "root", "Password_27");
+                        String response = messageClient.delete(
+                            "GAMECHARACTER",
+                            "playerId",
+                            "=",
+                            player.getLoginId()
+                        );
                         
-                        java.sql.PreparedStatement stmt = conn.prepareStatement(
-                            "DELETE FROM GAMECHARACTER WHERE playerId = ?");
-                        stmt.setString(1, player.getLoginId());
-                        int deletedRows = stmt.executeUpdate();
-                        
-                        stmt.close();
-                        conn.close();
-                        
-                        System.out.println("Deleted " + deletedRows + " characters for player: " + player.getLoginId());
+                        if (response.startsWith("SUCCESS:")) {
+                            System.out.println("Deleted characters for player: " + player.getLoginId());
+                        } else {
+                            throw new Exception(response);
+                        }
                     } catch (Exception e) {
                         System.out.println("Error deleting characters: " + e.getMessage());
                         JOptionPane.showMessageDialog(this, 
@@ -291,19 +304,18 @@ public class PlayerPanel extends JPanel {
             
             // Also remove from database
             try {
-                java.sql.Connection conn = java.sql.DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/gamedb", "root", "Password_27");
+                String response = messageClient.delete(
+                    "PERSON",
+                    "loginId",
+                    "=",
+                    player.getLoginId()
+                );
                 
-                // Delete from PERSON table
-                java.sql.PreparedStatement stmt = conn.prepareStatement(
-                    "DELETE FROM PERSON WHERE loginId = ?");
-                stmt.setString(1, player.getLoginId());
-                stmt.executeUpdate();
-                
-                stmt.close();
-                conn.close();
-                
-                System.out.println("Player deleted from database: " + player.getLoginId());
+                if (response.startsWith("SUCCESS:")) {
+                    System.out.println("Player deleted from database: " + player.getLoginId());
+                } else {
+                    throw new Exception(response);
+                }
             } catch (Exception e) {
                 System.out.println("Error deleting player from database: " + e.getMessage());
                 JOptionPane.showMessageDialog(this, 
@@ -336,13 +348,17 @@ public class PlayerPanel extends JPanel {
         List<Character> playerCharacters = new ArrayList<>();
         
         try {
-            String response = messageClient.select("GAMECHARACTER", "*", "=", "");
+            String response = messageClient.select("GAMECHARACTER", "playerId", "=", playerId);
+            if (response == null) {
+                throw new Exception("No response from server");
+            }
+            
             if (!response.startsWith("ERROR:")) {
                 String[] lines = response.split("\n");
                 if (lines.length > 1) { // Skip header row
                     for (int i = 1; i < lines.length; i++) {
                         String[] values = lines[i].split("\t");
-                        if (values.length >= 7 && values[1].equals(playerId)) {
+                        if (values.length >= 7) {
                             Character character = new Character(
                                 values[0], // name
                                 values[1], // playerId
@@ -356,11 +372,13 @@ public class PlayerPanel extends JPanel {
                         }
                     }
                 }
+            } else {
+                System.err.println("Error from server: " + response.substring(6));
             }
             
             System.out.println("Loaded " + playerCharacters.size() + " characters for player: " + playerId);
         } catch (Exception e) {
-            System.out.println("Error loading characters: " + e.getMessage());
+            System.err.println("Error loading characters: " + e.getMessage());
         }
         
         return playerCharacters;
@@ -372,35 +390,36 @@ public class PlayerPanel extends JPanel {
     private void loadPlayersFromDatabase() {
         mockPlayers.clear();
         try {
-            java.sql.Connection conn = java.sql.DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/gamedb", "root", "Password_27");
-            
-            java.sql.Statement stmt = conn.createStatement();
-            java.sql.ResultSet rs = stmt.executeQuery(
-                "SELECT loginId, email, password, dateCreated FROM PERSON");
-            
-            while (rs.next()) {
-                String loginId = rs.getString("loginId");
-                String email = rs.getString("email");
-                String password = rs.getString("password");
-                java.sql.Date dateCreated = rs.getDate("dateCreated");
-                
-                Player player = new Player(loginId, email, password);
-                // Convert java.sql.Date to java.time.LocalDate
-                if (dateCreated != null) {
-                    player.setDateCreated(dateCreated.toLocalDate());
-                }
-                
-                mockPlayers.add(player);
+            String response = messageClient.select("PERSON", "*", "=", "");
+            if (response == null) {
+                throw new Exception("No response from server");
             }
             
-            rs.close();
-            stmt.close();
-            conn.close();
+            if (!response.startsWith("ERROR:")) {
+                String[] lines = response.split("\n");
+                if (lines.length > 1) { // Skip header row
+                    for (int i = 1; i < lines.length; i++) {
+                        String[] values = lines[i].split("\t");
+                        if (values.length >= 4) {
+                            String loginId = values[0];
+                            String email = values[1];
+                            String password = values[2];
+                            java.time.LocalDate dateCreated = java.time.LocalDate.parse(values[3]);
+                            
+                            Player player = new Player(loginId, email, password);
+                            player.setDateCreated(dateCreated);
+                            
+                            mockPlayers.add(player);
+                        }
+                    }
+                }
+            } else {
+                throw new Exception(response.substring(6));
+            }
             
             System.out.println("Loaded " + mockPlayers.size() + " players from database");
         } catch (Exception e) {
-            System.out.println("Error loading players from database: " + e.getMessage());
+            System.err.println("Error loading players from database: " + e.getMessage());
             // Add fallback mock data if DB connection fails
             if (mockPlayers.isEmpty()) {
                 mockPlayers.add(new Player("user1", "user1@example.com", "password1"));

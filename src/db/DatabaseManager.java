@@ -18,15 +18,9 @@ import java.util.List;
  */
 public class DatabaseManager {
     // Database connection parameters
-    // School server connection (commented out)
-    // private static final String DB_URL = "jdbc:mysql://localhost:3306/gamedb";
-    // private static final String DB_USER = "your_db_username"; // Replace with actual username
-    // private static final String DB_PASSWORD = "your_db_password"; // Replace with actual password
-    
-    // Local MySQL connection
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/gamedb";
-    private static final String DB_USER = "root"; 
-    private static final String DB_PASSWORD = "Password_27"; 
+    private static final String DB_URL = "jdbc:mysql://db.engr.ship.edu:3306/cmsc471_27?useTimezone=true&serverTimezone=UTC";
+    private static final String DB_USER = "cmsc471_27";
+    private static final String DB_PASSWORD = "Password_27";
     
     private Connection connection = null;
     

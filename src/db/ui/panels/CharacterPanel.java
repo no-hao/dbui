@@ -96,6 +96,10 @@ public class CharacterPanel extends JPanel {
         characters.clear();
         try {
             String response = messageClient.select("GAMECHARACTER", "*", "=", "");
+            if (response == null) {
+                throw new Exception("No response from server");
+            }
+            
             if (response.startsWith("ERROR:")) {
                 throw new Exception(response.substring(6));
             }
@@ -120,7 +124,7 @@ public class CharacterPanel extends JPanel {
                 }
             }
         } catch (Exception e) {
-            System.out.println("Error loading characters from database: " + e.getMessage());
+            System.err.println("Error loading characters from database: " + e.getMessage());
             // Add fallback mock data if DB connection fails
             if (characters.isEmpty()) {
                 characters.add(new Character("Archer", "user1", 100, 20, 15));

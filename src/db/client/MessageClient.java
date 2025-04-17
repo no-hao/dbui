@@ -25,10 +25,18 @@ public class MessageClient {
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         } catch (IOException e) {
             System.err.println("Error connecting to server: " + e.getMessage());
+            // Initialize fields to allow graceful failure
+            socket = null;
+            out = null;
+            in = null;
         }
     }
 
     public String sendMessage(String message) {
+        if (out == null || in == null) {
+            return "ERROR: Not connected to server";
+        }
+        
         try {
             out.println(message);
             return in.readLine();

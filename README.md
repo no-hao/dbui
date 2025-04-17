@@ -34,82 +34,153 @@ src/
 
 ## Setup Instructions
 
-### Database Configuration
-You can configure the application to use either your local MySQL server or a school server.
+### 1. Local Development Environment
 
-#### Option 1: Local MySQL Server (Recommended for Development)
-1. Install MySQL Server if not already installed
-   ```
-   # For MacOS using Homebrew
-   brew install mysql
-   brew services start mysql
-   ```
+#### Prerequisites
+- JDK 11 or higher
+- MySQL Server installed locally
+- MySQL Connector/J (included in the `lib` folder)
 
-2. Create a new database named 'gamedb'
+#### Database Setup
+1. Create a MySQL database named `gamedb`:
    ```sql
-   mysql -u root -p
    CREATE DATABASE gamedb;
-   exit
    ```
 
-3. Update the database connection parameters in:
-   - `src/db/DatabaseManager.java`
-   - `src/db/server/MessageServer.java`
-
-   Use these settings for local MySQL:
+2. Update the database connection settings in `src/db/server/MessageServer.java`:
    ```java
    private static final String DB_URL = "jdbc:mysql://localhost:3306/gamedb";
-   private static final String DB_USER = "root"; 
-   private static final String DB_PASSWORD = "your_password"; // Replace with your MySQL root password
+   private static final String DB_USER = "root";
+   private static final String DB_PASSWORD = "yourpassword";
    ```
 
-#### Option 2: School MySQL Server
-1. Comment out the local MySQL connection parameters and uncomment the school server connection in:
-   - `src/db/DatabaseManager.java`
-   - `src/db/server/MessageServer.java`
+#### Compilation and Running
 
+1. **Compile the server and client:**
+   ```bash
+   # Navigate to the src directory
+   cd src
+   
+   # Compile the server
+   javac -cp "../lib/mysql-connector-j-8.0.33.jar:." db/server/MessageServer.java
+   
+   # Compile the client UI
+   javac -cp "../lib/mysql-connector-j-8.0.33.jar:." db/ui/DatabaseUI.java
+   ```
+
+   Note: On Windows, replace the colon (`:`) with a semicolon (`;`) in the classpath.
+
+2. **Run the server:**
+   ```bash
+   # From the src directory
+   java -cp "../lib/mysql-connector-j-8.0.33.jar:." db.server.MessageServer
+   ```
+
+3. **Run the client:**
+   ```bash
+   # In a new terminal, from the src directory
+   java -cp "../lib/mysql-connector-j-8.0.33.jar:." db.ui.DatabaseUI
+   ```
+
+### 2. School Server Deployment
+
+#### Prerequisites
+- SSH access to the school server
+- Proper credentials for the university database
+
+#### Database Configuration
+1. Ensure you're connected to the university network or using VPN if connecting remotely
+
+2. Update the database connection settings in `src/db/server/MessageServer.java` to use the university database:
    ```java
-   // School server connection
-   private static final String DB_URL = "jdbc:mysql://school_server:3306/gamedb";
-   private static final String DB_USER = "your_school_username"; 
-   private static final String DB_PASSWORD = "your_school_password"; 
+   private static final String DB_URL = "jdbc:mysql://db.engr.ship.edu:3306/cmsc471_27?useTimezone=true&serverTimezone=UTC";
+   private static final String DB_USER = "cmsc471_27";
+   private static final String DB_PASSWORD = "Password_27";
+   ```
+
+#### Deployment Steps
+
+1. **SSH into the school server:**
+   ```bash
+   ssh your_username@your_school_server.edu
+   ```
+
+2. **Copy your project files to the server** (or clone from your repository if available)
+
+3. **Compile and run the server:**
+   ```bash
+   # Navigate to the src directory
+   cd src
    
-   // Local MySQL connection (commented out)
-   // private static final String DB_URL = "jdbc:mysql://localhost:3306/gamedb";
-   // private static final String DB_USER = "root"; 
-   // private static final String DB_PASSWORD = "your_password";
-   ```
-
-### Project Setup and Compilation
-1. Ensure MySQL JDBC driver is in the lib/ folder
-   - The project uses mysql-connector-j-8.0.33.jar
-
-2. Compile the project:
-   ```
-   mkdir -p bin
-   javac -d bin -cp lib/mysql-connector-j-8.0.33.jar $(find src -name "*.java")
-   ```
-
-### Database Initialization
-1. Create and populate database tables:
-   ```
-   java -cp bin:lib/mysql-connector-j-8.0.33.jar db.DatabaseManager
-   ```
+   # Compile the server
+   javac -cp "../lib/mysql-connector-j-8.0.33.jar:." db/server/MessageServer.java
    
-   This script:
-   - Creates all required tables with appropriate constraints
-   - Adds sample data for testing
-
-### Running the Application
-1. Start the message server (must be running for UI to work properly):
-   ```
-   java -cp bin:lib/mysql-connector-j-8.0.33.jar db.server.MessageServer
+   # Run the server
+   java -cp "../lib/mysql-connector-j-8.0.33.jar:." db.server.MessageServer
    ```
 
-2. In a separate terminal, launch the UI application:
-   ```
-   java -cp bin:lib/mysql-connector-j-8.0.33.jar db.ui.DatabaseUI
-   ```
+4. **Run the client:**
+   - If you're running the client on the same server:
+     ```bash
+     # In a new terminal, from the src directory
+     java -cp "../lib/mysql-connector-j-8.0.33.jar:." db.ui.DatabaseUI
+     ```
+   - If you want to run the client on your local machine:
+     1. Update the `SERVER_HOST` in `src/db/client/MessageClient.java` to your school server's address
+     2. Compile and run the client locally as described in the local setup
+
+## Usage Instructions
+
+### Managing Players
+1. Navigate to the "Players" tab
+2. Use the "Add Player" button to create a new player
+3. Select a player and click "Edit Selected" to modify player details
+4. Select a player and click "Delete Selected" to remove a player
+
+### Managing Characters
+1. Navigate to the "Characters" tab
+2. Use the "Add Character" button to create a new character
+3. Select a character and click "Edit Selected" to modify character details
+4. Select a character and click "Delete Selected" to remove a character
+
+### Managing Abilities
+1. Navigate to the "Abilities" tab
+2. Use the provided controls to add, edit, and delete abilities
+
+### Managing Locations (Group of 4 assignment)
+1. Navigate to the "Locations" tab
+2. Use the provided controls to add, edit, and delete locations
+
+## Troubleshooting
+
+### Connection Issues
+- Ensure the server is running before starting the client
+- Check if the specified port (4446) is available and not blocked by a firewall
+- Verify database connection settings match your environment
+
+### Database Errors
+- Check that your MySQL server is running
+- Verify database credentials are correct
+- Ensure you have the necessary permissions to create and modify tables
+
+### Client-Server Communication
+- If using "localhost" doesn't work, try "127.0.0.1" instead
+- Ensure the proper MySQL connector version is being used (included in the lib folder)
+
+## Architecture
+
+This application follows a three-tier architecture:
+
+1. **Presentation Tier (UI)**: The Java Swing interface in the `db.ui` package
+2. **Application Tier (Server)**: The MessageServer that processes client requests
+3. **Data Tier**: The MySQL database that stores all game data
+
+Communication between tiers:
+- The UI sends requests to the server via the MessageClient
+- The server processes these requests and interacts with the database
+- The server returns results to the client for display in the UI
+
+This ensures a clean separation of concerns and allows for flexible deployment options.
 
 ## Database Schema
 The application implements the following database schema:
