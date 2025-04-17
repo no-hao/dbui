@@ -9,6 +9,7 @@
 package db.ui.dialogs;
 
 import db.Character;
+import db.client.MessageClient;
 import javax.swing.*;
 import java.awt.*;
 
@@ -18,12 +19,15 @@ import java.awt.*;
 public class CharacterFormDialog extends JDialog {
     private boolean saved = false;
     private Character character;
+    private MessageClient messageClient;
 
     public CharacterFormDialog(Character character) {
         setTitle(character == null ? "Add Character" : "Edit Character: " + character.getName());
         setLayout(new GridLayout(6, 2));
         
-        // Retrieve actual players from database via DatabaseManager
+        messageClient = new MessageClient();
+        
+        // Retrieve actual players from database via MessageClient
         final JComboBox<String> playerCombo;
         
         java.util.Vector<String> playerIds = new java.util.Vector<>();
@@ -31,19 +35,16 @@ public class CharacterFormDialog extends JDialog {
         playerIds.add("player2"); // Default fallback values
         
         try {
-            java.sql.Connection conn = java.sql.DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/gamedb", "root", "Password_27");
-            java.sql.Statement stmt = conn.createStatement();
-            java.sql.ResultSet rs = stmt.executeQuery("SELECT loginId FROM PLAYER");
-            
-            playerIds.clear(); // Clear default values if DB connection successful
-            while(rs.next()) {
-                playerIds.add(rs.getString("loginId"));
+            String response = messageClient.select("PLAYER", "loginId", "=", "");
+            if (!response.startsWith("ERROR:")) {
+                String[] lines = response.split("\n");
+                if (lines.length > 1) { // Skip header row
+                    playerIds.clear(); // Clear default values if DB connection successful
+                    for (int i = 1; i < lines.length; i++) {
+                        playerIds.add(lines[i].trim());
+                    }
+                }
             }
-            
-            rs.close();
-            stmt.close();
-            conn.close();
         } catch (Exception e) {
             System.out.println("Error loading players: " + e.getMessage());
         }
@@ -89,21 +90,8 @@ public class CharacterFormDialog extends JDialog {
             if (character == null) {
                 // Check if character name already exists
                 try {
-                    java.sql.Connection conn = java.sql.DriverManager.getConnection(
-                        "jdbc:mysql://localhost:3306/gamedb", "root", "Password_27");
-                    
-                    java.sql.PreparedStatement checkStmt = conn.prepareStatement(
-                        "SELECT COUNT(*) FROM GAMECHARACTER WHERE name = ?");
-                    checkStmt.setString(1, nameField.getText());
-                    java.sql.ResultSet rs = checkStmt.executeQuery();
-                    rs.next();
-                    int count = rs.getInt(1);
-                    
-                    rs.close();
-                    checkStmt.close();
-                    conn.close();
-                    
-                    if (count > 0) {
+                    String response = messageClient.select("GAMECHARACTER", "name", "=", nameField.getText());
+                    if (!response.startsWith("ERROR:") && response.split("\n").length > 1) {
                         JOptionPane.showMessageDialog(this, "A character with this name already exists");
                         return;
                     }
@@ -122,7 +110,6 @@ public class CharacterFormDialog extends JDialog {
                 nameField.getText(), 
                 selectedPlayer,
                 maxHp,  // maxPoints
-                maxHp,  // currentPoints (start at full)
                 stamina,
                 strength
             );
@@ -134,20 +121,24 @@ public class CharacterFormDialog extends JDialog {
         JButton cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(e -> dispose());
         
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        buttonPanel.add(cancelButton);
+        JPanel buttonPanel = new JPanel();
         buttonPanel.add(saveButton);
+        buttonPanel.add(cancelButton);
         
-        add(new JLabel("")); // Empty cell for spacing
+        add(new JLabel(""));
         add(buttonPanel);
         
         pack();
-        setSize(400, 300);
         setLocationRelativeTo(null);
         setModal(true);
     }
-
-    public boolean isSaved() { return saved; }
-    public Character getCharacter() { return character; }
+    
+    public boolean isSaved() {
+        return saved;
+    }
+    
+    public Character getCharacter() {
+        return character;
+    }
 }
 

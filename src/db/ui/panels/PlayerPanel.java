@@ -2,6 +2,7 @@ package db.ui.panels;
 
 import db.Player;
 import db.Character;
+import db.client.MessageClient;
 import db.ui.dialogs.PlayerDialog;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -22,6 +23,7 @@ public class PlayerPanel extends JPanel {
     
     // Database-backed list of players
     private List<Player> mockPlayers = new ArrayList<>();
+    private MessageClient messageClient;
 
     public PlayerPanel() {
         setLayout(new BorderLayout(5, 5));
@@ -334,38 +336,31 @@ public class PlayerPanel extends JPanel {
         List<Character> playerCharacters = new ArrayList<>();
         
         try {
-            java.sql.Connection conn = java.sql.DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/gamedb", "root", "Password_27");
-            
-            java.sql.PreparedStatement stmt = conn.prepareStatement(
-                "SELECT name, playerId, locationId, maxPoints, currentPoints, stamina, strength " +
-                "FROM GAMECHARACTER WHERE playerId = ?");
-            stmt.setString(1, playerId);
-            java.sql.ResultSet rs = stmt.executeQuery();
-            
-            while (rs.next()) {
-                String name = rs.getString("name");
-                String playerIdFromDB = rs.getString("playerId");
-                String locationId = rs.getString("locationId");
-                int maxPoints = rs.getInt("maxPoints");
-                int currentPoints = rs.getInt("currentPoints");
-                int stamina = rs.getInt("stamina");
-                int strength = rs.getInt("strength");
-                
-                Character character = new Character(
-                    name, playerIdFromDB, maxPoints, currentPoints, stamina, strength);
-                character.setLocationId(locationId);
-                
-                playerCharacters.add(character);
+            String response = messageClient.select("GAMECHARACTER", "*", "=", "");
+            if (!response.startsWith("ERROR:")) {
+                String[] lines = response.split("\n");
+                if (lines.length > 1) { // Skip header row
+                    for (int i = 1; i < lines.length; i++) {
+                        String[] values = lines[i].split("\t");
+                        if (values.length >= 7 && values[1].equals(playerId)) {
+                            Character character = new Character(
+                                values[0], // name
+                                values[1], // playerId
+                                Integer.parseInt(values[2]), // maxPoints
+                                Integer.parseInt(values[3]), // currentPoints
+                                Integer.parseInt(values[4]), // stamina
+                                Integer.parseInt(values[5]), // strength
+                                values[6]  // locationId
+                            );
+                            playerCharacters.add(character);
+                        }
+                    }
+                }
             }
-            
-            rs.close();
-            stmt.close();
-            conn.close();
             
             System.out.println("Loaded " + playerCharacters.size() + " characters for player: " + playerId);
         } catch (Exception e) {
-            System.out.println("Error loading characters for player: " + e.getMessage());
+            System.out.println("Error loading characters: " + e.getMessage());
         }
         
         return playerCharacters;

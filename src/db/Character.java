@@ -13,99 +13,84 @@ package db;
  * Maps to the GAMECHARACTER table.
  */
 public class Character {
-    // Primary key
-    private String name;
-    
-    // Foreign keys
-    private String playerId;
-    private String locationId;
-    
-    // Character attributes
+    private String name;           // Primary key
+    private String playerId;       // Foreign key to PLAYER.loginId
     private int maxPoints;
     private int currentPoints;
     private int stamina;
     private int strength;
-    private byte[] profilePicture;
+    private byte[] profilePicture; // MEDIUMBLOB
+    private String locationId;     // Foreign key to LOCATION.lId
 
     /**
      * Creates a new character with minimal required information.
      * 
-     * @param name Character name (primary key)
-     * @param playerId Player's login ID who owns this character
+     * @param name Character's name (primary key)
+     * @param playerId Player's login ID (foreign key)
      * @param maxPoints Maximum hit points
-     * @param currentPoints Current hit points
-     * @param stamina Character's stamina value
-     * @param strength Character's strength value
+     * @param stamina Stamina value
+     * @param strength Strength value
      */
-    public Character(String name, String playerId, int maxPoints, int currentPoints, int stamina, int strength) {
+    public Character(String name, String playerId, int maxPoints, int stamina, int strength) {
         this.name = name;
         this.playerId = playerId;
         this.maxPoints = maxPoints;
-        this.currentPoints = currentPoints;
+        this.currentPoints = maxPoints; // Start with full points
         this.stamina = stamina;
         this.strength = strength;
-        this.locationId = "default"; // Default location
-    }
-    
-    /**
-     * Creates a new character with complete information.
-     * 
-     * @param name Character name (primary key)
-     * @param playerId Player's login ID who owns this character
-     * @param maxPoints Maximum hit points
-     * @param currentPoints Current hit points
-     * @param stamina Character's stamina value
-     * @param strength Character's strength value
-     * @param locationId Location ID where the character is located
-     * @param profilePicture Character's profile picture as byte array
-     */
-    public Character(String name, String playerId, int maxPoints, int currentPoints, 
-                   int stamina, int strength, String locationId, byte[] profilePicture) {
-        this.name = name;
-        this.playerId = playerId;
-        this.maxPoints = maxPoints;
-        this.currentPoints = currentPoints;
-        this.stamina = stamina;
-        this.strength = strength;
-        this.locationId = locationId;
-        this.profilePicture = profilePicture;
-    }
-    
-    // For backward compatibility with existing code
-    public Character(int id, String name, String playerEmail, int maxHp, int strength, int stamina) {
-        this.name = name;
-        this.playerId = "user" + id; // Convert ID to a player ID format
-        this.maxPoints = maxHp;
-        this.currentPoints = maxHp; // Default to full health
-        this.stamina = stamina;
-        this.strength = strength;
+        this.profilePicture = null;
         this.locationId = "default"; // Default location
     }
 
-    // Getters
+    /**
+     * Creates a new character with complete information.
+     * 
+     * @param name Character's name (primary key)
+     * @param playerId Player's login ID (foreign key)
+     * @param maxPoints Maximum hit points
+     * @param currentPoints Current hit points
+     * @param stamina Stamina value
+     * @param strength Strength value
+     * @param locationId Location ID (foreign key)
+     */
+    public Character(String name, String playerId, int maxPoints, int currentPoints, int stamina, int strength, String locationId) {
+        this.name = name;
+        this.playerId = playerId;
+        this.maxPoints = maxPoints;
+        this.currentPoints = currentPoints;
+        this.stamina = stamina;
+        this.strength = strength;
+        this.profilePicture = null;
+        this.locationId = locationId;
+    }
+
+    // Getters and setters
     public String getName() { return name; }
-    public String getPlayerId() { return playerId; }
-    public int getMaxPoints() { return maxPoints; }
-    public int getCurrentPoints() { return currentPoints; }
-    public int getStamina() { return stamina; }
-    public int getStrength() { return strength; }
-    public String getLocationId() { return locationId; }
-    public byte[] getProfilePicture() { return profilePicture; }
-    
-    // Setters
     public void setName(String name) { this.name = name; }
+
+    public String getPlayerId() { return playerId; }
     public void setPlayerId(String playerId) { this.playerId = playerId; }
+
+    public int getMaxPoints() { return maxPoints; }
     public void setMaxPoints(int maxPoints) { this.maxPoints = maxPoints; }
+
+    public int getCurrentPoints() { return currentPoints; }
     public void setCurrentPoints(int currentPoints) { this.currentPoints = currentPoints; }
+
+    public int getStamina() { return stamina; }
     public void setStamina(int stamina) { this.stamina = stamina; }
+
+    public int getStrength() { return strength; }
     public void setStrength(int strength) { this.strength = strength; }
-    public void setLocationId(String locationId) { this.locationId = locationId; }
+
+    public byte[] getProfilePicture() { return profilePicture; }
     public void setProfilePicture(byte[] profilePicture) { this.profilePicture = profilePicture; }
-    
-    // Compatibility methods for existing code
-    public int getId() { return playerId != null ? playerId.hashCode() : 0; }
-    public void setId(int id) { this.playerId = "user" + id; }
-    public String getPlayerEmail() { return playerId + "@example.com"; } // Mock email based on playerId
+
+    public String getLocationId() { return locationId; }
+    public void setLocationId(String locationId) { this.locationId = locationId; }
+
+    // Alias for maxPoints to match UI
     public int getMaxHp() { return maxPoints; }
+    public void setMaxHp(int maxHp) { this.maxPoints = maxHp; }
 }
 
